@@ -1,5 +1,6 @@
 using NUnit.Framework.Constraints;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Enemy : MonoBehaviour
 {
@@ -8,12 +9,18 @@ public class Enemy : MonoBehaviour
     SpriteRenderer M_sprite;
     CapsuleCollider2D M_collider;
 
+    bool isDead = false;
     Hp Enemy_hp;
     public Transform Player_ts;
     bool istracing = false;
 
     public int Monster_nextmove;
     public int Monster_nextmove_y;
+
+    public GameObject item_Potion;
+    public GameObject item_Ashes;
+    public ObjManager Obj_Mananger;
+
 
 
     private void Awake()
@@ -25,6 +32,12 @@ public class Enemy : MonoBehaviour
        M_sprite= GetComponent<SpriteRenderer>();
     }
 
+    private void OnEnable() //생성될때 초기설정
+    {
+        Enemy_hp.current_hp= 10;
+        isDead = false;
+        rigid.simulated = true;
+    }
 
     void FixedUpdate()
     {
@@ -37,7 +50,7 @@ public class Enemy : MonoBehaviour
         //Debug.DrawRay(frontVec, Dirvec * 1f, Color.red);
         //RaycastHit2D find_player = Physics2D.Raycast(rigid.position, Dirvec, 2, LayerMask.GetMask("Player"));
 
-        Collider2D player_find = Physics2D.OverlapCircle(rigid.position, 3f, LayerMask.GetMask("Player")); // 범위 추적
+        Collider2D player_find = Physics2D.OverlapCircle(rigid.position, 2f, LayerMask.GetMask("Player")); // 범위 추적
 
         if (player_find !=null)   // find_player.collider !=nul 레이쏠때 조건문
         {
@@ -61,9 +74,13 @@ public class Enemy : MonoBehaviour
         }
 
 
-        if(Enemy_hp.hp <=0)
+        if(!isDead && Enemy_hp.current_hp <=0)
         {
+            isDead = true;
             Enemy_hp.die();
+            rigid.simulated = false;
+            Drop_item();
+            Invoke("Disapper", 1f);
         }
     }
 
@@ -103,5 +120,33 @@ public class Enemy : MonoBehaviour
         CancelInvoke("Think");
 
         Invoke("Think", 3);
+    }
+
+    void Drop_item()
+    {
+        int ran = Random.Range(0, 10);
+
+        if(ran <3)
+        {
+            Debug.Log("NO, item");
+        }
+
+        else if(ran <7)
+        {
+            GameObject item_Ashes = Obj_Mananger.MakeObj("Skeleton_ashes");
+            item_Ashes.transform.position= transform.position;
+        }
+
+        else if(ran <10)
+        {
+            GameObject item_potion = Obj_Mananger.MakeObj("Enemy_potion");
+            item_potion.transform.position= transform.position; 
+        }
+    }
+
+    void Disapper()
+    {
+        gameObject.SetActive(false);
+        Obj_Mananger.Enemy_now_Spawn--;
     }
 }

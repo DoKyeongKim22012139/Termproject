@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class Hp : MonoBehaviour
 {
-    public int hp;
+    public float max_hp;
+    public float current_hp;
     Animator animator;
 
 
@@ -10,12 +11,15 @@ public class Hp : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        current_hp= max_hp;
     }
+
+   
     public void TakeDamage(int damage)
     {
-        if (0 < hp)
+        if (0 <= current_hp)
         {
-            hp -= damage;
+            current_hp -= damage;
         }
 
     }
@@ -24,7 +28,6 @@ public class Hp : MonoBehaviour
     public void die()
     {
         animator.SetTrigger("IsDie");
-        Destroy(gameObject, 0.4f);
     }
 
     
